@@ -1,0 +1,109 @@
+<project name="ProSOM" default="build" basedir=".">
+	<description>
+		Build script for the ProSOM program.
+    </description>
+	<!-- set global properties for this build -->
+	<property name="src" location="." />
+	<property name="build" location="build" />
+	<property name="version" value="2.2r" />
+	<property name="jar" value="prosom-${version}.jar" />
+
+
+	<propertyfile file="prosom.properties" comment="ProSOM properties">
+		<entry key="version" value="${version}" />
+	</propertyfile>
+
+
+	<property name="dist" location="prosom-${version}" />
+
+	
+	
+
+	<target name="build" depends="dist">
+		<copy todir="${dist}">
+					<fileset dir="${build}">
+						
+						<include name="*.jar" />
+						<include name="*.txt" />
+
+					</fileset>
+
+
+				</copy>
+		<copy todir="${dist}">
+			<fileset dir="${src}">
+				
+				<exclude name="tmp*.jar" />
+				<exclude name="*-src.jar" />
+				<include name="*.jar" />
+				<include name="*.txt" />
+
+			</fileset>
+
+
+		</copy>
+		<delete dir="${build}" />
+		<zip basedir="${dist}" destfile="${dist}.zip" />
+		<delete failonerror="false" dir="${dist}" />
+		<delete failonerror="false" file="prosom.properties" />
+	</target>
+
+
+	<target name="init" depends="clean">
+		<!-- Create the time stamp -->
+		<tstamp>
+			<format property="TODAY_LOCAL" pattern="yyyy-MM-dd" />
+		</tstamp>
+		<!-- Create the build directory structure used by compile -->
+		<mkdir dir="${build}" />
+	</target>
+
+	<target name="compile" depends="init" description="compile the source ">
+		<!-- Compile the java code from ${src} into ${build} -->
+		<javac classpath="ajt-1.15c.jar:jargs.jar:src/dev/javaml-0.0.16.jar" source="1.5" target="1.5" srcdir="${src}" destdir="${build}" excludes="training/**,dev/**" />
+	</target>
+
+	<target name="dist" depends="compile" description="generate the distribution">
+		<!-- Create the distribution directory -->
+		<mkdir dir="${dist}" />
+
+		<copy todir="${build}">
+			<fileset dir="${src}">
+				<exclude name="bin/" />
+				<include name="*.properties" />
+			</fileset>
+			<fileset dir="resources">
+				<include name="*.dat" />
+				<include name="*.properties" />
+				
+			</fileset>
+		</copy>
+
+		<jar jarfile="${build}/${jar}" basedir="${build}">
+			<manifest>
+				<attribute name="Main-Class" value="be.abeel.prosom.ProSOM" />
+				<attribute name="Class-Path" value="ajt-1.15c.jar jargs.jar" />
+				
+			</manifest>
+		</jar>
+
+		<filter token="version" value="${version}" />
+		
+
+		
+
+
+
+	</target>
+
+	<target name="clean" description="clean up">
+		<!-- Delete the ${build} and ${dist} directory trees -->
+		
+		<delete failonerror="false" dir="${build}" />
+		<delete failonerror="false" dir="${dist}" />
+		<zip basedir="${dist}" destfile="${dist}.zip" />
+		
+	</target>
+	
+	
+</project>
